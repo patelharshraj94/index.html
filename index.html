@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#080810"/>
+<title>My Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#080810;--surface:#0f0f1c;--surface2:#13131f;--border:rgba(255,255,255,0.07);
+  --accent:#7c6fff;--accent2:#ff6b9d;--accent3:#00e5b0;--accent4:#ffa94d;
+  --text:#f0f0ff;--muted:#4a4a6a;--subtle:#2a2a3a;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 20% 0%,rgba(124,111,255,0.08) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 80% 100%,rgba(255,107,157,0.06) 0%,transparent 60%),
+  radial-gradient(ellipse 40% 30% at 60% 50%,rgba(0,229,176,0.04) 0%,transparent 60%);
+pointer-events:none;z-index:0;}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh;position:relative;z-index:1;}
+.sidebar{width:220px;flex-shrink:0;background:rgba(15,15,28,0.95);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:sticky;top:0;height:100vh;backdrop-filter:blur(20px);}
+.main{flex:1;padding:32px 28px;max-width:1100px;}
+
+/* SIDEBAR */
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.logo-mark{display:flex;align-items:center;gap:10px;}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 16px var(--accent);}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.5px;color:var(--text);}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:2px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;font-size:13px;color:var(--muted);transition:all 0.2s;border-left:2px solid transparent;text-decoration:none;}
+.nav-item:hover,.nav-item.active{color:var(--text);background:rgba(124,111,255,0.08);border-left-color:var(--accent);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-label{font-weight:500;}
+.nav-section{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:16px 20px 6px;margin-top:8px;}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);}
+.date-widget{font-size:11px;color:var(--muted);}
+.date-big{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--text);line-height:1;}
+.date-info{margin-top:4px;color:var(--muted);font-size:11px;}
+
+/* SECTIONS */
+.section{display:none;}
+.section.active{display:block;}
+.page-title{font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,34px);font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:28px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;}
+.card-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.card-title span{font-size:16px;}
+
+/* STAT CARDS */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;inset:0;opacity:0.04;background:var(--c,var(--accent));}
+.stat-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1;color:var(--c,var(--accent));}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:6px;}
+.stat-icon{position:absolute;right:16px;top:16px;font-size:24px;opacity:0.4;}
+
+/* PROGRESS BAR */
+.prog-bar{height:6px;background:var(--subtle);border-radius:6px;overflow:hidden;margin-top:8px;}
+.prog-fill{height:100%;border-radius:6px;transition:width 0.6s ease;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;letter-spacing:0.5px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#9080ff;transform:translateY(-1px);}
+.btn-ghost{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{background:rgba(255,255,255,0.09);color:var(--text);}
+.btn-danger{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);color:#ff6b6b;}
+
+/* INPUTS */
+.inp{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;}
+.inp:focus{border-color:rgba(124,111,255,0.5);}
+.inp::placeholder{color:var(--muted);}
+select.inp option{background:#1a1a2e;}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+label.lbl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);display:block;margin-bottom:5px;}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* TASKS */
+.task-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+.task-item:hover{background:rgba(255,255,255,0.04);}
+.task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;cursor:pointer;}
+.task-check.done{background:var(--accent3);border-color:var(--accent3);}
+.task-text{flex:1;font-size:13px;}
+.task-text.done{text-decoration:line-through;color:var(--muted);}
+.task-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.task-pri{width:3px;height:30px;border-radius:3px;flex-shrink:0;}
+
+/* GOALS */
+.goal-item{padding:14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
+.goal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.goal-name{font-size:14px;font-weight:500;}
+.goal-pct{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.goal-cat{font-size:10px;color:var(--muted);margin-top:2px;}
+.goal-actions{display:flex;gap:6px;margin-top:10px;}
+
+/* PROJECTS */
+.proj-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden;}
+.proj-accent{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px;}
+.proj-name{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;}
+.proj-desc{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.proj-footer{display:flex;align-items:center;justify-content:space-between;}
+.proj-status{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* VISION BOARD */
+.vision-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+.vision-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.vision-card:hover{border-color:rgba(124,111,255,0.4);transform:translateY(-2px);}
+.vision-emoji{font-size:32px;margin-bottom:8px;}
+.vision-title{font-size:12px;font-weight:600;color:var(--text);}
+.vision-desc{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5;}
+
+/* HABITS */
+.habit-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.habit-row:last-child{border:none;}
+.habit-name{flex:1;font-size:13px;}
+.habit-dots{display:flex;gap:5px;}
+.habit-dot{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.habit-dot.done{background:var(--accent3);border-color:var(--accent3);}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.modal{background:#0f0f1e;border:1px solid rgba(124,111,255,0.25);border-radius:18px;padding:26px;width:100%;max-width:460px;box-shadow:0 0 80px rgba(124,111,255,0.15);max-height:90vh;overflow-y:auto;}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:20px;}
+.modal-footer{display:flex;gap:10px;margin-top:20px;}
+.modal-footer .btn{flex:1;justify-content:center;padding:11px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:10px;font-size:13px;z-index:200;font-family:'DM Sans',sans-serif;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:opacity 0.3s;}
+
+/* DAILY PROGRESS */
+.day-ring{position:relative;width:110px;height:110px;margin:0 auto 16px;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--subtle);stroke-width:8;}
+.ring-fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.8s ease;}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+.ring-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+/* QUOTE */
+.quote-card{background:linear-gradient(135deg,rgba(124,111,255,0.1),rgba(255,107,157,0.06));border:1px solid rgba(124,111,255,0.2);border-radius:16px;padding:24px;text-align:center;margin-bottom:20px;}
+.quote-text{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;line-height:1.6;color:var(--text);}
+.quote-author{font-size:11px;color:var(--muted);margin-top:10px;letter-spacing:2px;text-transform:uppercase;}
+
+/* MOBILE */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,20,0.97);border-top:1px solid var(--border);z-index:50;padding:6px 0 max(6px,env(safe-area-inset-bottom));backdrop-filter:blur(20px);}
+.mobile-nav-inner{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 8px;}
+.mobile-nav-inner::-webkit-scrollbar{display:none;}
+.mob-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 14px;cursor:pointer;color:var(--muted);font-size:9px;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;flex-shrink:0;min-width:56px;}
+.mob-btn.active,.mob-btn:hover{color:var(--accent);}
+.mob-icon{font-size:19px;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .mobile-nav{display:block;}
+  .main{padding:20px 14px 90px;}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .inp-row{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .vision-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.section.active{animation:fadeIn 0.3s ease;}
+
+/* FINANCE */
+.fin-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;}
+.fin-stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;}
+.fin-stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:5px;}
+.fin-stat-sub{font-size:11px;margin-top:4px;}
+.txn-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.txn-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.txn-info{flex:1;min-width:0;}
+.txn-name{font-size:13px;font-weight:500;}
+.txn-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.txn-amt{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.budget-bar-wrap{margin-bottom:14px;}
+.budget-label-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.upcoming-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}
+.fin-tab{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.fin-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+        <div class="logo-dot"></div>
+        <div>
+          <div class="logo-text">MyOS</div>
+          <div class="logo-sub">Personal Dashboard</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-section">Overview</div>
+    <a class="nav-item active" onclick="nav('home')" href="#"><span class="nav-icon">⚡</span><span class="nav-label">Home</span></a>
+    <a class="nav-item" onclick="nav('progress')" href="#"><span class="nav-icon">📊</span><span class="nav-label">Daily Progress</span></a>
+    <div class="nav-section">My Life</div>
+    <a class="nav-item" onclick="nav('tasks')" href="#"><span class="nav-icon">✅</span><span class="nav-label">Tasks</span></a>
+    <a class="nav-item" onclick="nav('goals')" href="#"><span class="nav-icon">🎯</span><span class="nav-label">Goals</span></a>
+    <a class="nav-item" onclick="nav('projects')" href="#"><span class="nav-icon">🚀</span><span class="nav-label">Projects</span></a>
+    <a class="nav-item" onclick="nav('vision')" href="#"><span class="nav-icon">🌟</span><span class="nav-label">Vision Board</span></a>
+    <div class="nav-section">Finance</div>
+    <a class="nav-item" onclick="nav('finance')" href="#"><span class="nav-icon">💰</span><span class="nav-label">Finance</span></a>
+    <div class="sidebar-footer">
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span id="sync-indicator" style="font-size:11px;color:var(--muted);">☁ No Sync</span>
+          <button onclick="manualSync()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;" title="Sync now">↻</button>
+        </div>
+        <button onclick="openSyncSetup()" style="width:100%;padding:7px;background:rgba(124,111,255,0.1);border:1px solid rgba(124,111,255,0.2);border-radius:8px;color:#818cf8;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:1px;">⚙ SYNC SETTINGS</button>
+      </div>
+      <div class="date-widget">
+        <div class="date-big" id="sb-day"></div>
+        <div class="date-info" id="sb-date"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME -->
+    <div class="section active" id="sec-home">
+      <div class="page-title">Good <span id="greeting-time">morning</span> 👋</div>
+      <div class="page-sub" id="home-date"></div>
+
+      <div class="quote-card">
+        <div class="quote-text" id="daily-quote">"The secret of getting ahead is getting started."</div>
+        <div class="quote-author" id="daily-author">— Mark Twain</div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:20px;">
+        <div class="stat-card" style="--c:var(--accent)">
+          <div class="stat-icon">✅</div>
+          <div class="stat-num" id="s-tasks">0</div>
+          <div class="stat-label">Tasks Today</div>
+        </div>
+        <div class="stat-card" style="--c:var(--accent3)">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-num" id="s-goals">0</div>
+          <div class="stat-label">Active Goals</div>
+        </div>
+        <div class="stat-card" style="--c:var(--accent4)">
+          <div class="stat-icon">🚀</div>
+          <div class="stat-num" id="s-proj">0</div>
+          <div class="stat-label">Projects</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Today's Tasks <span>✅</span></div>
+          <div id="home-tasks-list"></div>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="nav('tasks')">View All Tasks →</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Top Goals <span>🎯</span></div>
+          <div id="home-goals-list"></div>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:8px;" onclick="nav('goals')">View All Goals →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY PROGRESS -->
+    <div class="section" id="sec-progress">
+      <div class="page-title">Daily Progress</div>
+      <div class="page-sub">Track your habits and wins every day</div>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div class="card" style="text-align:center;">
+          <div class="card-title" style="justify-content:center;">Overall Today</div>
+          <div class="day-ring">
+            <svg class="ring-svg" width="110" height="110" viewBox="0 0 110 110">
+              <circle class="ring-bg" cx="55" cy="55" r="46"/>
+              <circle class="ring-fg" id="ring-fg" cx="55" cy="55" r="46" stroke="var(--accent)"
+                stroke-dasharray="289" stroke-dashoffset="289"/>
+            </svg>
+            <div class="ring-label">
+              <div class="ring-pct" id="ring-pct">0%</div>
+              <div class="ring-sub">done</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);" id="habit-summary">0 of 0 habits complete</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Today's Wins <span>🏆</span></div>
+          <div id="wins-list" style="min-height:80px;"></div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <input class="inp" id="win-inp" placeholder="Add a win for today..." style="flex:1;"/>
+            <button class="btn btn-primary" onclick="addWin()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:20px;">Habits Tracker — <span style="color:var(--text);font-family:'Syne',sans-serif;" id="habit-week-label"></span>
+          <button class="btn btn-primary" onclick="openModal('habit')">+ Add Habit</button>
+        </div>
+        <div id="habit-headers" style="display:flex;align-items:center;gap:12px;margin-bottom:8px;padding:0 0 8px;border-bottom:1px solid var(--border);"></div>
+        <div id="habits-list"></div>
+        <div id="habits-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;display:none;">No habits yet — add one above!</div>
+      </div>
+    </div>
+
+    <!-- TASKS -->
+    <div class="section" id="sec-tasks">
+      <div class="page-title">Tasks</div>
+      <div class="page-sub">Everything you need to get done</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <input class="inp" id="task-search" placeholder="🔍 Search tasks..." style="flex:1;min-width:140px;" oninput="renderTasks()"/>
+        <select class="inp" id="task-filter" style="width:auto;" onchange="renderTasks()">
+          <option value="all">All</option><option value="active">Active</option><option value="done">Done</option>
+        </select>
+        <select class="inp" id="task-cat-filter" style="width:auto;" onchange="renderTasks()">
+          <option value="all">All Categories</option>
+          <option>Work</option><option>Personal</option><option>Health</option><option>Finance</option><option>Learning</option><option>Other</option>
+        </select>
+        <button class="btn btn-primary" onclick="openModal('task')">+ Add Task</button>
+      </div>
+      <div id="tasks-list"></div>
+      <div id="tasks-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:48px 0;display:none;">No tasks yet. Add one!</div>
+    </div>
+
+    <!-- GOALS -->
+    <div class="section" id="sec-goals">
+      <div class="page-title">Goals</div>
+      <div class="page-sub">Your big picture ambitions</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="openModal('goal')">+ Add Goal</button>
+      </div>
+      <div id="goals-list"></div>
+      <div id="goals-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:48px 0;display:none;">No goals yet. Dream big and add one!</div>
+    </div>
+
+    <!-- PROJECTS -->
+    <div class="section" id="sec-projects">
+      <div class="page-title">Projects</div>
+      <div class="page-sub">Everything you're building or working on</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="openModal('project')">+ Add Project</button>
+      </div>
+      <div id="projects-list"></div>
+      <div id="projects-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:48px 0;display:none;">No projects yet. Start something great!</div>
+    </div>
+
+    <!-- VISION -->
+    <div class="section" id="sec-vision">
+      <div class="page-title">Vision Board</div>
+      <div class="page-sub">Your dreams, values & future self</div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="openModal('vision')">+ Add Vision</button>
+      </div>
+      <div class="vision-grid" id="vision-grid"></div>
+      <div id="vision-empty" style="color:var(--muted);font-size:13px;text-align:center;padding:48px 0;display:none;">Your vision board is empty. Add what you're working towards!</div>
+    </div>
+
+    <!-- FINANCE -->
+    <div class="section" id="sec-finance">
+      <div class="page-title">Finance</div>
+      <div class="page-sub">Your money, fully in control</div>
+
+      <!-- Overview Stats -->
+      <div class="grid-3" style="margin-bottom:20px;" id="fin-stats-row"></div>
+
+      <!-- Earning Targets -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Earning Targets <span>🎯</span>
+          <button class="btn btn-primary" onclick="openModal('earntarget')">+ Set Target</button>
+        </div>
+        <div id="earn-targets-list"></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <!-- Income -->
+        <div class="card">
+          <div class="card-title">Income <span>💵</span>
+            <button class="btn btn-primary" style="padding:6px 10px;font-size:11px;" onclick="openModal('income')">+ Add</button>
+          </div>
+          <div id="income-list"></div>
+          <div id="income-empty" style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;display:none;">No income added yet.</div>
+        </div>
+        <!-- Expenses -->
+        <div class="card">
+          <div class="card-title">Expenses <span>💸</span>
+            <button class="btn btn-primary" style="padding:6px 10px;font-size:11px;" onclick="openModal('expense')">+ Add</button>
+          </div>
+          <div id="expense-list"></div>
+          <div id="expense-empty" style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;display:none;">No expenses added yet.</div>
+        </div>
+      </div>
+
+      <!-- Monthly Budget -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Monthly Budget by Category <span>📊</span>
+          <button class="btn btn-primary" onclick="openModal('budget')">+ Add Budget</button>
+        </div>
+        <div id="budget-list"></div>
+        <div id="budget-empty" style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;display:none;">No budget categories yet.</div>
+      </div>
+
+      <!-- Upcoming Planned Expenses -->
+      <div class="card">
+        <div class="card-title">Upcoming Planned Expenses <span>📅</span>
+          <button class="btn btn-primary" onclick="openModal('planned')">+ Add Planned</button>
+        </div>
+        <div id="planned-list"></div>
+        <div id="planned-empty" style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0;display:none;">No planned expenses yet.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <div class="mob-btn active" onclick="nav('home')" id="mob-home"><div class="mob-icon">⚡</div>Home</div>
+    <div class="mob-btn" onclick="nav('progress')" id="mob-progress"><div class="mob-icon">📊</div>Progress</div>
+    <div class="mob-btn" onclick="nav('tasks')" id="mob-tasks"><div class="mob-icon">✅</div>Tasks</div>
+    <div class="mob-btn" onclick="nav('goals')" id="mob-goals"><div class="mob-icon">🎯</div>Goals</div>
+    <div class="mob-btn" onclick="nav('projects')" id="mob-projects"><div class="mob-icon">🚀</div>Projects</div>
+    <div class="mob-btn" onclick="nav('vision')" id="mob-vision"><div class="mob-icon">🌟</div>Vision</div>
+    <div class="mob-btn" onclick="nav('finance')" id="mob-finance"><div class="mob-icon">💰</div>Finance</div>
+    <div class="mob-btn" onclick="openSyncSetup()"><div class="mob-icon">☁</div>Sync</div>
+  </div>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-bg" id="modal-bg" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <!-- Task Modal -->
+  <div class="modal" id="modal-task" style="display:none;">
+    <div class="modal-title" id="task-modal-title">New Task</div>
+    <label class="lbl">Title</label>
+    <input class="inp" id="t-title" placeholder="What needs to be done?"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Category</label>
+        <select class="inp" id="t-cat"><option>Work</option><option>Personal</option><option>Health</option><option>Finance</option><option>Learning</option><option>Other</option></select></div>
+      <div><label class="lbl" style="margin-top:10px;">Priority</label>
+        <select class="inp" id="t-pri"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:10px;">Due Date</label>
+    <input class="inp" type="date" id="t-due"/>
+    <label class="lbl" style="margin-top:10px;">Notes</label>
+    <textarea class="inp" id="t-notes" rows="2" placeholder="Any details..."></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveTask()">Save Task</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Goal Modal -->
+  <div class="modal" id="modal-goal" style="display:none;">
+    <div class="modal-title" id="goal-modal-title">New Goal</div>
+    <label class="lbl">Goal Title</label>
+    <input class="inp" id="g-title" placeholder="e.g. Run a half marathon"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Category</label>
+        <select class="inp" id="g-cat"><option>Health</option><option>Career</option><option>Finance</option><option>Learning</option><option>Relationships</option><option>Personal</option></select></div>
+      <div><label class="lbl" style="margin-top:10px;">Target Date</label>
+        <input class="inp" type="date" id="g-date"/></div>
+    </div>
+    <label class="lbl" style="margin-top:10px;">Progress (0–100%)</label>
+    <input class="inp" type="number" id="g-pct" min="0" max="100" value="0" placeholder="0"/>
+    <label class="lbl" style="margin-top:10px;">Why this matters</label>
+    <textarea class="inp" id="g-why" rows="2" placeholder="Your reason..."></textarea>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveGoal()">Save Goal</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Project Modal -->
+  <div class="modal" id="modal-project" style="display:none;">
+    <div class="modal-title" id="proj-modal-title">New Project</div>
+    <label class="lbl">Project Name</label>
+    <input class="inp" id="p-name" placeholder="e.g. Personal Website"/>
+    <label class="lbl" style="margin-top:10px;">Description</label>
+    <textarea class="inp" id="p-desc" rows="2" placeholder="What is this project about?"></textarea>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Status</label>
+        <select class="inp" id="p-status"><option value="planning">Planning</option><option value="active">Active</option><option value="paused">Paused</option><option value="done">Done</option></select></div>
+      <div><label class="lbl" style="margin-top:10px;">Color</label>
+        <select class="inp" id="p-color">
+          <option value="var(--accent)">Purple</option><option value="var(--accent2)">Pink</option>
+          <option value="var(--accent3)">Green</option><option value="var(--accent4)">Orange</option>
+          <option value="#60a5fa">Blue</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:10px;">Progress (0–100%)</label>
+    <input class="inp" type="number" id="p-pct" min="0" max="100" value="0"/>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Vision Modal -->
+  <div class="modal" id="modal-vision" style="display:none;">
+    <div class="modal-title">New Vision</div>
+    <label class="lbl">Title</label>
+    <input class="inp" id="v-title" placeholder="e.g. Financial Freedom"/>
+    <label class="lbl" style="margin-top:10px;">Description</label>
+    <input class="inp" id="v-desc" placeholder="What does this mean to you?"/>
+    <label class="lbl" style="margin-top:10px;">Emoji / Icon</label>
+    <input class="inp" id="v-emoji" placeholder="🏡" maxlength="2"/>
+    <label class="lbl" style="margin-top:10px;">Category</label>
+    <select class="inp" id="v-cat"><option>Life</option><option>Career</option><option>Health</option><option>Finance</option><option>Family</option><option>Travel</option><option>Growth</option></select>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveVision()">Save Vision</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Habit Modal -->
+  <div class="modal" id="modal-habit" style="display:none;">
+    <div class="modal-title">New Habit</div>
+    <label class="lbl">Habit Name</label>
+    <input class="inp" id="h-name" placeholder="e.g. Drink 2L water"/>
+    <label class="lbl" style="margin-top:10px;">Emoji</label>
+    <input class="inp" id="h-emoji" placeholder="💧" maxlength="2"/>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveHabit()">Save Habit</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Income Modal -->
+  <div class="modal" id="modal-income" style="display:none;">
+    <div class="modal-title" id="income-modal-title">Add Income</div>
+    <label class="lbl">Source / Description</label>
+    <input class="inp" id="inc-desc" placeholder="e.g. Salary, Freelance, Side hustle"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Amount ($)</label>
+        <input class="inp" type="number" id="inc-amt" placeholder="0.00" min="0"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Category</label>
+        <select class="inp" id="inc-cat"><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Side Hustle</option><option>Other</option></select></div>
+    </div>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Date</label>
+        <input class="inp" type="date" id="inc-date"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Frequency</label>
+        <select class="inp" id="inc-freq"><option>One-time</option><option>Weekly</option><option>Monthly</option><option>Yearly</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveIncome()">Save Income</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div class="modal" id="modal-expense" style="display:none;">
+    <div class="modal-title" id="expense-modal-title">Add Expense</div>
+    <label class="lbl">Description</label>
+    <input class="inp" id="exp-desc" placeholder="e.g. Rent, Groceries, Netflix"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Amount ($)</label>
+        <input class="inp" type="number" id="exp-amt" placeholder="0.00" min="0"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Category</label>
+        <select class="inp" id="exp-cat">
+          <option>Housing</option><option>Food</option><option>Transport</option><option>Health</option>
+          <option>Entertainment</option><option>Shopping</option><option>Utilities</option><option>Education</option><option>Other</option>
+        </select></div>
+    </div>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Date</label>
+        <input class="inp" type="date" id="exp-date"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Frequency</label>
+        <select class="inp" id="exp-freq"><option>One-time</option><option>Weekly</option><option>Monthly</option><option>Yearly</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveExpense()">Save Expense</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Budget Modal -->
+  <div class="modal" id="modal-budget" style="display:none;">
+    <div class="modal-title">Set Monthly Budget</div>
+    <label class="lbl">Category</label>
+    <select class="inp" id="bud-cat">
+      <option>Housing</option><option>Food</option><option>Transport</option><option>Health</option>
+      <option>Entertainment</option><option>Shopping</option><option>Utilities</option><option>Education</option><option>Savings</option><option>Other</option>
+    </select>
+    <label class="lbl" style="margin-top:10px;">Monthly Budget ($)</label>
+    <input class="inp" type="number" id="bud-amt" placeholder="0.00" min="0"/>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveBudget()">Save Budget</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Planned Expense Modal -->
+  <div class="modal" id="modal-planned" style="display:none;">
+    <div class="modal-title">Add Planned Expense</div>
+    <label class="lbl">Description</label>
+    <input class="inp" id="pl-desc" placeholder="e.g. New laptop, Vacation, Car service"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Estimated Amount ($)</label>
+        <input class="inp" type="number" id="pl-amt" placeholder="0.00" min="0"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Category</label>
+        <select class="inp" id="pl-cat"><option>Tech</option><option>Travel</option><option>Home</option><option>Health</option><option>Education</option><option>Vehicle</option><option>Other</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:10px;">Planned Date</label>
+    <input class="inp" type="date" id="pl-date"/>
+    <label class="lbl" style="margin-top:10px;">Priority</label>
+    <select class="inp" id="pl-pri"><option value="high">High — Must happen</option><option value="medium" selected>Medium — Likely</option><option value="low">Low — Nice to have</option></select>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="savePlanned()">Save Planned</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Earning Target Modal -->
+  <div class="modal" id="modal-earntarget" style="display:none;">
+    <div class="modal-title">Set Earning Target</div>
+    <label class="lbl">Target Name</label>
+    <input class="inp" id="et-name" placeholder="e.g. Monthly Salary Goal"/>
+    <div class="inp-row">
+      <div><label class="lbl" style="margin-top:10px;">Target Amount ($)</label>
+        <input class="inp" type="number" id="et-amt" placeholder="0.00" min="0"/></div>
+      <div><label class="lbl" style="margin-top:10px;">Period</label>
+        <select class="inp" id="et-period"><option value="weekly">Weekly</option><option value="monthly" selected>Monthly</option><option value="yearly">Yearly</option></select></div>
+    </div>
+    <label class="lbl" style="margin-top:10px;">Current Earned ($) — optional</label>
+    <input class="inp" type="number" id="et-earned" placeholder="0.00" min="0" value="0"/>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveEarnTarget()">Save Target</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none;"></div>
+
+<!-- SYNC SETUP MODAL -->
+<div id="sync-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(6px);">
+  <div style="background:#0f0f1e;border:1px solid rgba(124,111,255,0.3);border-radius:18px;padding:28px;width:100%;max-width:480px;box-shadow:0 0 80px rgba(124,111,255,0.2);max-height:90vh;overflow-y:auto;">
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;">☁ Cloud Sync Setup</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Sync your dashboard across all devices for free using JSONBin.</div>
+
+    <div id="sync-status-text" style="font-size:13px;font-weight:600;margin-bottom:18px;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">⭕ Not connected</div>
+
+    <!-- Step by step guide -->
+    <div style="background:rgba(124,111,255,0.06);border:1px solid rgba(124,111,255,0.15);border-radius:12px;padding:16px;margin-bottom:20px;font-size:12px;line-height:1.8;color:#a0a0c0;">
+      <div style="font-weight:700;color:var(--text);margin-bottom:8px;font-size:13px;">📋 How to get your FREE API Key:</div>
+      <div>1. Go to <strong style="color:#818cf8;">jsonbin.io</strong> and click <strong>Sign Up Free</strong></div>
+      <div>2. Verify your email and log in</div>
+      <div>3. Click your profile icon → <strong>API Keys</strong></div>
+      <div>4. Copy your <strong>Master Key</strong> and paste it below</div>
+      <div>5. Click <strong>Connect</strong> — done! ✅</div>
+    </div>
+
+    <label class="lbl">Your JSONBin Master Key</label>
+    <input class="inp" id="sync-key-inp" placeholder="$2a$10$..." type="password" style="margin-bottom:4px;"/>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">This is stored only on your device, never sent anywhere else.</div>
+
+    <div id="sync-bin-row" style="display:none;">
+      <label class="lbl">Bin ID <span style="color:var(--muted);font-weight:400;">(auto-filled after first connect, or paste existing)</span></label>
+      <input class="inp" id="sync-bin-inp" placeholder="Leave empty to create new, or paste existing Bin ID"/>
+      <div style="font-size:10px;color:var(--accent4);margin-top:4px;margin-bottom:14px;">⚠ On your SECOND device: paste the same Bin ID shown here after first connect.</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button id="sync-connect-btn" onclick="connectSync()" style="flex:1;padding:12px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Connect</button>
+      <button onclick="disconnectSync()" style="padding:12px 16px;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:8px;color:#f87171;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Disconnect</button>
+      <button onclick="closeSyncSetup()" style="padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+const STORE_KEY = 'myos_v1';
+let state = load();
+let currentModal = null;
+let editIndex = null;
+let currentSection = 'home';
+
+function load() {
+  try {
+    const s = localStorage.getItem(STORE_KEY);
+    if (s) return JSON.parse(s);
+  } catch {}
+  return {
+    tasks: [
+      {id:uid(),title:'Plan my week',cat:'Personal',pri:'high',due:today(),done:false,notes:''},
+      {id:uid(),title:'Check emails',cat:'Work',pri:'medium',due:today(),done:false,notes:''},
+    ],
+    goals: [
+      {id:uid(),title:'Get fit & healthy',cat:'Health',date:'2025-12-31',pct:30,why:'Feel better every day'},
+      {id:uid(),title:'Save $5,000',cat:'Finance',date:'2025-12-31',pct:45,why:'Emergency fund'},
+    ],
+    projects: [
+      {id:uid(),name:'Personal Dashboard',desc:'Build my own OS for life',status:'active',color:'var(--accent)',pct:60},
+    ],
+    visions: [
+      {id:uid(),title:'Dream Home',desc:'A peaceful place I love',emoji:'🏡',cat:'Life'},
+      {id:uid(),title:'Financial Freedom',desc:'Money working for me',emoji:'💰',cat:'Finance'},
+      {id:uid(),title:'Travel the World',desc:'See 30+ countries',emoji:'✈️',cat:'Travel'},
+      {id:uid(),title:'Healthy Body',desc:'Strong, energetic, vital',emoji:'💪',cat:'Health'},
+    ],
+    habits: [
+      {id:uid(),name:'Morning Workout',emoji:'🏋️'},
+      {id:uid(),name:'Read 20 pages',emoji:'📚'},
+      {id:uid(),name:'Drink 2L Water',emoji:'💧'},
+    ],
+    habitLog: {},
+    wins: {},
+    income: [],
+    expenses: [],
+    budgets: [
+      {id:uid(),cat:'Housing',amt:1500},
+      {id:uid(),cat:'Food',amt:400},
+      {id:uid(),cat:'Transport',amt:200},
+    ],
+    planned: [],
+    earnTargets: [
+      {id:uid(),name:'Monthly Income Goal',amt:5000,period:'monthly',earned:0},
+    ],
+  };
+}
+
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function today() { return new Date().toISOString().split('T')[0]; }
+
+// ─── CLOUD SYNC ───
+let syncKey = localStorage.getItem('myos_synckey')||'';
+let syncBin = localStorage.getItem('myos_syncbin')||'';
+let syncTimer = null;
+let syncing = false;
+
+function setSyncIndicator(status) {
+  const el = document.getElementById('sync-indicator');
+  if (!el) return;
+  const map = {
+    idle:   {text:'☁ Synced',    color:'var(--accent3)'},
+    saving: {text:'↑ Saving...',  color:'var(--accent4)'},
+    loading:{text:'↓ Loading...',color:'var(--accent4)'},
+    error:  {text:'⚠ Offline',   color:'#f87171'},
+    off:    {text:'☁ No Sync',   color:'var(--muted)'},
+  };
+  const s = map[status]||map.idle;
+  el.textContent = s.text;
+  el.style.color = s.color;
+}
+
+async function cloudSave() {
+  if (!syncKey || !syncBin) { localSave(); setSyncIndicator('off'); return; }
+  localSave();
+  setSyncIndicator('saving');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${syncBin}`, {
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':syncKey,'X-Bin-Versioning':'false'},
+      body: JSON.stringify(state)
+    });
+    if (!r.ok) throw new Error('fail');
+    setSyncIndicator('idle');
+  } catch { setSyncIndicator('error'); }
+}
+
+async function cloudLoad() {
+  if (!syncKey || !syncBin) return false;
+  setSyncIndicator('loading');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${syncBin}/latest`, {
+      headers:{'X-Master-Key':syncKey}
+    });
+    if (!r.ok) throw new Error('fail');
+    const data = await r.json();
+    if (data.record && Object.keys(data.record).length > 0) {
+      state = data.record;
+      localSave();
+    }
+    setSyncIndicator('idle');
+    return true;
+  } catch { setSyncIndicator('error'); return false; }
+}
+
+async function createBin() {
+  if (!syncKey) return null;
+  try {
+    const r = await fetch('https://api.jsonbin.io/v3/b', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':syncKey,'X-Bin-Name':'MyOS-Dashboard','X-Bin-Private':'true'},
+      body: JSON.stringify(state)
+    });
+    if (!r.ok) throw new Error('fail');
+    const data = await r.json();
+    return data.metadata?.id || null;
+  } catch { return null; }
+}
+
+function localSave() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} }
+
+function save() {
+  localSave();
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(()=>{ cloudSave(); }, 1500);
+}
+
+// ─── SYNC SETUP MODAL ───
+function openSyncSetup() {
+  document.getElementById('sync-modal').style.display='flex';
+  document.getElementById('sync-key-inp').value = syncKey||'';
+  document.getElementById('sync-bin-inp').value = syncBin||'';
+  updateSyncStatus();
+}
+function closeSyncSetup() { document.getElementById('sync-modal').style.display='none'; }
+
+function updateSyncStatus() {
+  const connected = syncKey && syncBin;
+  document.getElementById('sync-status-text').textContent = connected ? '✅ Cloud sync is ON' : '⭕ Not connected';
+  document.getElementById('sync-status-text').style.color = connected ? 'var(--accent3)' : 'var(--muted)';
+  document.getElementById('sync-bin-row').style.display = syncKey ? 'block' : 'none';
+}
+
+async function connectSync() {
+  const key = document.getElementById('sync-key-inp').value.trim();
+  const binId = document.getElementById('sync-bin-inp').value.trim();
+  if (!key) { alert('Please enter your API key'); return; }
+  const btn = document.getElementById('sync-connect-btn');
+  btn.textContent = 'Connecting...'; btn.disabled = true;
+  syncKey = key;
+  localStorage.setItem('myos_synckey', key);
+  if (binId) {
+    syncBin = binId;
+    localStorage.setItem('myos_syncbin', binId);
+    const ok = await cloudLoad();
+    if (ok) { toast('☁ Connected & data loaded!'); renderSection(currentSection); }
+    else toast('Connected but could not load data','error');
+  } else {
+    // create new bin
+    const id = await createBin();
+    if (id) {
+      syncBin = id;
+      localStorage.setItem('myos_syncbin', id);
+      document.getElementById('sync-bin-inp').value = id;
+      toast('☁ New sync created! Copy your Bin ID below.');
+    } else { toast('Could not create sync bin — check your API key','error'); }
+  }
+  btn.textContent = 'Connect'; btn.disabled = false;
+  updateSyncStatus();
+}
+
+function disconnectSync() {
+  if (!confirm('Disconnect cloud sync? Your local data stays safe.')) return;
+  syncKey=''; syncBin='';
+  localStorage.removeItem('myos_synckey');
+  localStorage.removeItem('myos_syncbin');
+  updateSyncStatus();
+  setSyncIndicator('off');
+  toast('Sync disconnected','info');
+}
+
+async function manualSync() {
+  if (!syncKey||!syncBin) { openSyncSetup(); return; }
+  const ok = await cloudLoad();
+  if (ok) { toast('☁ Synced from cloud!'); renderSection(currentSection); }
+  else toast('Sync failed — check connection','error');
+}
+
+// ─── QUOTES ───
+const QUOTES = [
+  {q:"The secret of getting ahead is getting started.",a:"Mark Twain"},
+  {q:"You don't have to be great to start, but you have to start to be great.",a:"Zig Ziglar"},
+  {q:"Dream big. Start small. Act now.",a:"Robin Sharma"},
+  {q:"Discipline is the bridge between goals and accomplishment.",a:"Jim Rohn"},
+  {q:"Small daily improvements lead to staggering long-term results.",a:"Robin Sharma"},
+  {q:"The only way to do great work is to love what you do.",a:"Steve Jobs"},
+  {q:"Success is the sum of small efforts, repeated day in and day out.",a:"Robert Collier"},
+];
+
+// ─── NAVIGATION ───
+function nav(section) {
+  currentSection = section;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mob-btn').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+section).classList.add('active');
+  const navEl = document.querySelector(`.nav-item[onclick*="'${section}'"]`);
+  if (navEl) navEl.classList.add('active');
+  const mobEl = document.getElementById('mob-'+section);
+  if (mobEl) mobEl.classList.add('active');
+  renderSection(section);
+  return false;
+}
+
+function renderSection(s) {
+  if (s==='home') renderHome();
+  if (s==='tasks') renderTasks();
+  if (s==='goals') renderGoals();
+  if (s==='projects') renderProjects();
+  if (s==='vision') renderVision();
+  if (s==='finance') renderFinance();
+  if (s==='progress') renderProgress();
+  // scroll active mobile tab into view
+  const mobEl = document.getElementById('mob-'+s);
+  if (mobEl) mobEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+// ─── HOME ───
+function renderHome() {
+  const now = new Date();
+  const h = now.getHours();
+  document.getElementById('greeting-time').textContent = h<12?'morning':h<17?'afternoon':'evening';
+  document.getElementById('home-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  const q = QUOTES[Math.floor((now.getTime()/86400000))%QUOTES.length];
+  document.getElementById('daily-quote').textContent = `"${q.q}"`;
+  document.getElementById('daily-author').textContent = `— ${q.a}`;
+  document.getElementById('s-tasks').textContent = state.tasks.filter(t=>t.due===today()&&!t.done).length;
+  document.getElementById('s-goals').textContent = state.goals.filter(g=>g.pct<100).length;
+  document.getElementById('s-proj').textContent = state.projects.length;
+  // Home tasks
+  const todayTasks = state.tasks.filter(t=>t.due===today()).slice(0,4);
+  const tl = document.getElementById('home-tasks-list');
+  tl.innerHTML = todayTasks.length ? todayTasks.map(t=>`
+    <div class="task-item" style="margin-bottom:6px;padding:10px 12px;">
+      <div class="task-check ${t.done?'done':''}" onclick="quickToggle('${t.id}')">
+        ${t.done?'<span style="color:#080810;font-size:11px;font-weight:900;">✓</span>':''}
+      </div>
+      <span class="task-text ${t.done?'done':''}" style="font-size:12px;">${t.title}</span>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0;">No tasks for today.</div>';
+  // Home goals
+  const gl = document.getElementById('home-goals-list');
+  const topGoals = state.goals.slice(0,3);
+  gl.innerHTML = topGoals.length ? topGoals.map(g=>`
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span>${g.title}</span><span style="color:var(--accent);font-weight:700;">${g.pct}%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${g.pct}%;background:var(--accent3);"></div></div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0;">No goals yet.</div>';
+}
+
+function quickToggle(id) {
+  const t = state.tasks.find(x=>x.id===id);
+  if (t) { t.done = !t.done; save(); renderHome(); }
+}
+
+// ─── TASKS ───
+function renderTasks() {
+  const search = document.getElementById('task-search')?.value.toLowerCase()||'';
+  const filter = document.getElementById('task-filter')?.value||'all';
+  const catF = document.getElementById('task-cat-filter')?.value||'all';
+  let tasks = state.tasks.filter(t=>{
+    if (filter==='active'&&t.done) return false;
+    if (filter==='done'&&!t.done) return false;
+    if (catF!=='all'&&t.cat!==catF) return false;
+    if (search&&!t.title.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  const priColor = {high:'#f87171',medium:'#facc15',low:'#4ade80'};
+  const el = document.getElementById('tasks-list');
+  const em = document.getElementById('tasks-empty');
+  if (!tasks.length) { el.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  el.innerHTML = tasks.map((t,i)=>`
+    <div class="task-item">
+      <div class="task-pri" style="background:${priColor[t.pri]||'#4ade80'};"></div>
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">
+        ${t.done?'<span style="color:#080810;font-size:11px;font-weight:900;">✓</span>':''}
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div class="task-text ${t.done?'done':''}">${t.title}</div>
+        <div class="task-meta">${t.cat}${t.due?' · '+fmtDate(t.due):''}${t.notes?' · '+t.notes.slice(0,40):''}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost" style="padding:5px 10px;font-size:11px;" onclick="editTask('${t.id}')">✏</button>
+        <button class="btn btn-danger" style="padding:5px 10px;font-size:11px;" onclick="deleteTask('${t.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(x=>x.id===id);
+  if (t) { t.done=!t.done; save(); renderTasks(); if(currentSection==='home') renderHome(); }
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(x=>x.id!==id); save(); renderTasks(); toast('Task deleted','info');
+}
+
+function editTask(id) {
+  const t = state.tasks.find(x=>x.id===id);
+  editIndex = id;
+  document.getElementById('t-title').value = t.title;
+  document.getElementById('t-cat').value = t.cat;
+  document.getElementById('t-pri').value = t.pri;
+  document.getElementById('t-due').value = t.due||'';
+  document.getElementById('t-notes').value = t.notes||'';
+  document.getElementById('task-modal-title').textContent = 'Edit Task';
+  openModal('task');
+}
+
+function saveTask() {
+  const title = document.getElementById('t-title').value.trim();
+  if (!title) { toast('Please enter a title','error'); return; }
+  const data = { title, cat:document.getElementById('t-cat').value, pri:document.getElementById('t-pri').value, due:document.getElementById('t-due').value, notes:document.getElementById('t-notes').value, done:false };
+  if (editIndex) {
+    const t = state.tasks.find(x=>x.id===editIndex);
+    Object.assign(t, data); toast('Task updated!');
+  } else {
+    state.tasks.unshift({id:uid(),...data}); toast('Task added!');
+  }
+  save(); closeModal(); renderTasks(); if(currentSection==='home') renderHome();
+}
+
+// ─── GOALS ───
+function renderGoals() {
+  const el = document.getElementById('goals-list');
+  const em = document.getElementById('goals-empty');
+  const catColors = {Health:'var(--accent3)',Career:'var(--accent)',Finance:'var(--accent4)',Learning:'#60a5fa',Relationships:'var(--accent2)',Personal:'#a78bfa'};
+  if (!state.goals.length) { el.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  el.innerHTML = state.goals.map(g=>`
+    <div class="goal-item">
+      <div class="goal-header">
+        <div>
+          <div class="goal-name">${g.title}</div>
+          <div class="goal-cat">${g.cat}${g.date?' · Target: '+fmtDate(g.date):''}</div>
+        </div>
+        <div class="goal-pct" style="color:${catColors[g.cat]||'var(--accent)'};">${g.pct}%</div>
+      </div>
+      ${g.why?`<div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-style:italic;">"${g.why}"</div>`:''}
+      <div class="prog-bar"><div class="prog-fill" style="width:${g.pct}%;background:${catColors[g.cat]||'var(--accent)'};"></div></div>
+      <div class="goal-actions">
+        <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="editGoal('${g.id}')">✏ Edit</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="updateGoalPct('${g.id}')">📈 Update %</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="deleteGoal('${g.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function editGoal(id) {
+  const g = state.goals.find(x=>x.id===id);
+  editIndex = id;
+  document.getElementById('g-title').value = g.title;
+  document.getElementById('g-cat').value = g.cat;
+  document.getElementById('g-date').value = g.date||'';
+  document.getElementById('g-pct').value = g.pct;
+  document.getElementById('g-why').value = g.why||'';
+  document.getElementById('goal-modal-title').textContent = 'Edit Goal';
+  openModal('goal');
+}
+
+function updateGoalPct(id) {
+  const g = state.goals.find(x=>x.id===id);
+  const v = prompt(`Update progress for "${g.title}" (current: ${g.pct}%)\nEnter new % (0-100):`);
+  if (v===null) return;
+  const n = Math.min(100,Math.max(0,parseInt(v)||0));
+  g.pct = n; save(); renderGoals(); toast(`Progress updated to ${n}%`);
+}
+
+function deleteGoal(id) { state.goals = state.goals.filter(x=>x.id!==id); save(); renderGoals(); toast('Goal deleted','info'); }
+
+function saveGoal() {
+  const title = document.getElementById('g-title').value.trim();
+  if (!title) { toast('Please enter a title','error'); return; }
+  const data = { title, cat:document.getElementById('g-cat').value, date:document.getElementById('g-date').value, pct:Math.min(100,Math.max(0,parseInt(document.getElementById('g-pct').value)||0)), why:document.getElementById('g-why').value };
+  if (editIndex) { const g=state.goals.find(x=>x.id===editIndex); Object.assign(g,data); toast('Goal updated!'); }
+  else { state.goals.unshift({id:uid(),...data}); toast('Goal added!'); }
+  save(); closeModal(); renderGoals();
+}
+
+// ─── PROJECTS ───
+function renderProjects() {
+  const el = document.getElementById('projects-list');
+  const em = document.getElementById('projects-empty');
+  const statusStyle = {planning:{bg:'rgba(250,204,21,0.1)',color:'#facc15'},active:{bg:'rgba(0,229,176,0.1)',color:'var(--accent3)'},paused:{bg:'rgba(148,163,184,0.1)',color:'#94a3b8'},done:{bg:'rgba(124,111,255,0.1)',color:'var(--accent)'}};
+  if (!state.projects.length) { el.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  el.innerHTML = state.projects.map(p=>{
+    const ss = statusStyle[p.status]||statusStyle.active;
+    return `<div class="proj-card">
+      <div class="proj-accent" style="background:${p.color};"></div>
+      <div style="padding-left:8px;">
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-desc">${p.desc||''}</div>
+        <div class="prog-bar" style="margin-bottom:12px;"><div class="prog-fill" style="width:${p.pct||0}%;background:${p.color};"></div></div>
+        <div class="proj-footer">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="proj-status" style="background:${ss.bg};color:${ss.color};">${p.status}</span>
+            <span style="font-size:11px;color:var(--muted);">${p.pct||0}% complete</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="editProject('${p.id}')">✏ Edit</button>
+            <button class="btn btn-danger" style="font-size:11px;padding:5px 10px;" onclick="deleteProject('${p.id}')">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`;}).join('');
+}
+
+function editProject(id) {
+  const p = state.projects.find(x=>x.id===id);
+  editIndex = id;
+  document.getElementById('p-name').value = p.name;
+  document.getElementById('p-desc').value = p.desc||'';
+  document.getElementById('p-status').value = p.status;
+  document.getElementById('p-color').value = p.color;
+  document.getElementById('p-pct').value = p.pct||0;
+  document.getElementById('proj-modal-title').textContent = 'Edit Project';
+  openModal('project');
+}
+
+function deleteProject(id) { state.projects = state.projects.filter(x=>x.id!==id); save(); renderProjects(); toast('Project deleted','info'); }
+
+function saveProject() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { toast('Please enter a name','error'); return; }
+  const data = { name, desc:document.getElementById('p-desc').value, status:document.getElementById('p-status').value, color:document.getElementById('p-color').value, pct:Math.min(100,Math.max(0,parseInt(document.getElementById('p-pct').value)||0)) };
+  if (editIndex) { const p=state.projects.find(x=>x.id===editIndex); Object.assign(p,data); toast('Project updated!'); }
+  else { state.projects.unshift({id:uid(),...data}); toast('Project added!'); }
+  save(); closeModal(); renderProjects();
+}
+
+// ─── VISION ───
+function renderVision() {
+  const el = document.getElementById('vision-grid');
+  const em = document.getElementById('vision-empty');
+  if (!state.visions.length) { el.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  el.innerHTML = state.visions.map(v=>`
+    <div class="vision-card" onclick="deleteVisionConfirm('${v.id}')">
+      <div class="vision-emoji">${v.emoji||'⭐'}</div>
+      <div class="vision-title">${v.title}</div>
+      <div class="vision-desc">${v.desc||''}</div>
+      <div style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-top:8px;">${v.cat}</div>
+      <div style="font-size:9px;color:var(--muted);margin-top:4px;">tap to remove</div>
+    </div>`).join('');
+}
+
+function deleteVisionConfirm(id) {
+  if (confirm('Remove this vision?')) { state.visions=state.visions.filter(x=>x.id!==id); save(); renderVision(); }
+}
+
+function saveVision() {
+  const title = document.getElementById('v-title').value.trim();
+  if (!title) { toast('Please enter a title','error'); return; }
+  state.visions.push({id:uid(),title,desc:document.getElementById('v-desc').value,emoji:document.getElementById('v-emoji').value||'⭐',cat:document.getElementById('v-cat').value});
+  save(); closeModal(); renderVision(); toast('Vision added!');
+}
+
+// ─── PROGRESS ───
+function renderProgress() {
+  const d = today();
+  if (!state.habitLog[d]) state.habitLog[d] = {};
+  if (!state.wins[d]) state.wins[d] = [];
+
+  // Week label
+  const now = new Date();
+  document.getElementById('habit-week-label').textContent = now.toLocaleDateString('en-US',{month:'long',day:'numeric'});
+
+  // Wins
+  renderWins();
+
+  // Habit headers (last 7 days)
+  const days7 = [];
+  for(let i=6;i>=0;i--){const dd=new Date(now);dd.setDate(dd.getDate()-i);days7.push(dd.toISOString().split('T')[0]);}
+  const hh = document.getElementById('habit-headers');
+  hh.innerHTML = `<div style="flex:1;font-size:11px;color:var(--muted);">Habit</div>`+days7.map(dd=>`<div style="width:22px;text-align:center;font-size:9px;color:var(--muted);">${new Date(dd+'T12:00').toLocaleDateString('en-US',{weekday:'short'}).slice(0,1)}</div>`).join('');
+
+  // Habits list
+  const el = document.getElementById('habits-list');
+  const em = document.getElementById('habits-empty');
+  if (!state.habits.length) { el.innerHTML=''; em.style.display='block'; updateRing(); return; }
+  em.style.display='none';
+  el.innerHTML = state.habits.map(h=>`
+    <div class="habit-row">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;">${h.emoji||'⚡'} ${h.name}</div>
+      </div>
+      <div class="habit-dots">
+        ${days7.map(dd=>{
+          const done=(state.habitLog[dd]||{})[h.id];
+          return `<div class="habit-dot ${done?'done':''}" onclick="toggleHabit('${h.id}','${dd}')" title="${dd}">${done?'✓':''}</div>`;
+        }).join('')}
+      </div>
+      <button class="btn btn-danger" style="padding:4px 8px;font-size:11px;margin-left:8px;" onclick="deleteHabit('${h.id}')">✕</button>
+    </div>`).join('');
+  updateRing();
+}
+
+function toggleHabit(hid, date) {
+  if (!state.habitLog[date]) state.habitLog[date]={};
+  state.habitLog[date][hid] = !state.habitLog[date][hid];
+  save(); renderProgress();
+}
+
+function deleteHabit(id) { state.habits=state.habits.filter(x=>x.id!==id); save(); renderProgress(); toast('Habit removed','info'); }
+
+function saveHabit() {
+  const name = document.getElementById('h-name').value.trim();
+  if (!name) { toast('Enter a habit name','error'); return; }
+  state.habits.push({id:uid(),name,emoji:document.getElementById('h-emoji').value||'⚡'});
+  save(); closeModal(); renderProgress(); toast('Habit added!');
+}
+
+function updateRing() {
+  const d = today();
+  const log = state.habitLog[d]||{};
+  const total = state.habits.length;
+  const done = state.habits.filter(h=>log[h.id]).length;
+  const pct = total ? Math.round((done/total)*100) : 0;
+  const circ = 289;
+  const offset = circ - (circ * pct / 100);
+  const fg = document.getElementById('ring-fg');
+  if (fg) { fg.style.strokeDashoffset = offset; }
+  const rp = document.getElementById('ring-pct');
+  if (rp) rp.textContent = pct+'%';
+  const hs = document.getElementById('habit-summary');
+  if (hs) hs.textContent = `${done} of ${total} habits complete`;
+}
+
+function renderWins() {
+  const d = today();
+  const wins = state.wins[d]||[];
+  const el = document.getElementById('wins-list');
+  if (!wins.length) { el.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0;">No wins logged yet. Add your first one!</div>'; return; }
+  el.innerHTML = wins.map((w,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <span style="color:var(--accent4);font-size:14px;">🏆</span>
+      <span style="flex:1;font-size:12px;">${w}</span>
+      <button onclick="deleteWin(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>
+    </div>`).join('');
+}
+
+function addWin() {
+  const inp = document.getElementById('win-inp');
+  const v = inp.value.trim();
+  if (!v) return;
+  const d = today();
+  if (!state.wins[d]) state.wins[d]=[];
+  state.wins[d].push(v); inp.value=''; save(); renderWins(); toast('Win logged! 🏆');
+}
+
+function deleteWin(i) {
+  const d = today();
+  state.wins[d].splice(i,1); save(); renderWins();
+}
+
+// ─── MODAL ───
+function openModal(type) {
+  currentModal = type;
+  if (!editIndex) {
+    ['t-title','t-notes','g-title','g-why','p-name','p-desc','v-title','v-desc','v-emoji','h-name','h-emoji',
+     'inc-desc','exp-desc','pl-desc','et-name'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['g-pct','p-pct','inc-amt','exp-amt','pl-amt','et-amt','et-earned'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='0';});
+    ['inc-date','exp-date','pl-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today();});
+    const tt=document.getElementById('task-modal-title'); if(tt) tt.textContent='New Task';
+    const gt=document.getElementById('goal-modal-title'); if(gt) gt.textContent='New Goal';
+    const pt=document.getElementById('proj-modal-title'); if(pt) pt.textContent='New Project';
+    const imt=document.getElementById('income-modal-title'); if(imt) imt.textContent='Add Income';
+    const emt=document.getElementById('expense-modal-title'); if(emt) emt.textContent='Add Expense';
+  }
+  document.getElementById('modal-bg').style.display='flex';
+  ['task','goal','project','vision','habit','income','expense','budget','planned','earntarget'].forEach(t=>{
+    const el=document.getElementById('modal-'+t); if(el) el.style.display=t===type?'block':'none';
+  });
+  setTimeout(()=>{ const first=document.querySelector('#modal-'+type+' input'); if(first) first.focus(); },100);
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').style.display='none';
+  currentModal=null; editIndex=null;
+}
+
+// ─── TOAST ───
+let toastTimer;
+function toast(msg, type='success') {
+  clearTimeout(toastTimer);
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.display='block';
+  el.style.background = type==='error'?'#7f1d1d':type==='info'?'#1e1b4b':'#14532d';
+  el.style.border = `1px solid ${type==='error'?'#f87171':type==='info'?'#6366f1':'#4ade80'}`;
+  el.style.color = '#f1f5f9';
+  toastTimer = setTimeout(()=>{ el.style.display='none'; }, 2600);
+}
+
+// ─── UTILS ───
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+// ─── FINANCE ───
+function curMonth() { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}`; }
+function curWeekStart() { const n=new Date(); n.setDate(n.getDate()-n.getDay()); return n.toISOString().split('T')[0]; }
+function curWeekEnd()   { const n=new Date(); n.setDate(n.getDate()+(6-n.getDay())); return n.toISOString().split('T')[0]; }
+function fmt$(n){ return '$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function finTotals() {
+  const mo = curMonth();
+  const ws = curWeekStart(); const we = curWeekEnd();
+  const monthInc  = state.income.filter(i=>i.date&&i.date.startsWith(mo)).reduce((a,i)=>a+Number(i.amt),0);
+  const monthExp  = state.expenses.filter(e=>e.date&&e.date.startsWith(mo)).reduce((a,e)=>a+Number(e.amt),0);
+  const weekInc   = state.income.filter(i=>i.date>=ws&&i.date<=we).reduce((a,i)=>a+Number(i.amt),0);
+  const weekExp   = state.expenses.filter(e=>e.date>=ws&&e.date<=we).reduce((a,e)=>a+Number(e.amt),0);
+  const totalInc  = state.income.reduce((a,i)=>a+Number(i.amt),0);
+  const totalExp  = state.expenses.reduce((a,e)=>a+Number(e.amt),0);
+  return {monthInc,monthExp,weekInc,weekExp,totalInc,totalExp,net:totalInc-totalExp,monthNet:monthInc-monthExp,weekNet:weekInc-weekExp};
+}
+
+function renderFinance() {
+  const t = finTotals();
+  const netColor = t.monthNet>=0?'var(--accent3)':'#f87171';
+  // Stats
+  document.getElementById('fin-stats-row').innerHTML = `
+    <div class="fin-stat">
+      <div class="stat-icon">💵</div>
+      <div class="fin-stat-num" style="color:var(--accent3);">${fmt$(t.monthInc)}</div>
+      <div class="fin-stat-label">This Month Income</div>
+      <div class="fin-stat-sub" style="color:var(--muted);">Week: ${fmt$(t.weekInc)}</div>
+    </div>
+    <div class="fin-stat">
+      <div class="stat-icon">💸</div>
+      <div class="fin-stat-num" style="color:#f87171;">${fmt$(t.monthExp)}</div>
+      <div class="fin-stat-label">This Month Expenses</div>
+      <div class="fin-stat-sub" style="color:var(--muted);">Week: ${fmt$(t.weekExp)}</div>
+    </div>
+    <div class="fin-stat">
+      <div class="stat-icon">${t.monthNet>=0?'📈':'📉'}</div>
+      <div class="fin-stat-num" style="color:${netColor};">${fmt$(t.monthNet)}</div>
+      <div class="fin-stat-label">Monthly Net</div>
+      <div class="fin-stat-sub" style="color:var(--muted);">All time: ${fmt$(t.net)}</div>
+    </div>`;
+
+  // Earning Targets
+  const etEl = document.getElementById('earn-targets-list');
+  if (!state.earnTargets.length) { etEl.innerHTML='<div style="color:var(--muted);font-size:12px;padding:8px 0;">No targets set yet.</div>'; }
+  else etEl.innerHTML = state.earnTargets.map(et=>{
+    // figure out actual earned this period
+    let actual = 0;
+    const mo = curMonth(); const ws = curWeekStart(); const we = curWeekEnd();
+    if (et.period==='monthly') actual = state.income.filter(i=>i.date&&i.date.startsWith(mo)).reduce((a,i)=>a+Number(i.amt),0);
+    else if (et.period==='weekly') actual = state.income.filter(i=>i.date>=ws&&i.date<=we).reduce((a,i)=>a+Number(i.amt),0);
+    else actual = state.income.reduce((a,i)=>a+Number(i.amt),0);
+    const pct = Math.min(100,Math.round((actual/Number(et.amt||1))*100));
+    const col = pct>=100?'var(--accent3)':pct>=60?'var(--accent4)':'#f87171';
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div>
+          <span style="font-size:13px;font-weight:600;">${et.name}</span>
+          <span style="font-size:10px;color:var(--muted);margin-left:8px;text-transform:uppercase;letter-spacing:1px;">${et.period}</span>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:${col};">${fmt$(actual)}</span>
+          <span style="font-size:11px;color:var(--muted);"> / ${fmt$(et.amt)}</span>
+        </div>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;">
+        <span style="font-size:10px;color:var(--muted);">${pct}% of target</span>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px;" onclick="editEarnTarget('${et.id}')">✏ Edit</button>
+          <button class="btn btn-danger" style="font-size:10px;padding:3px 8px;" onclick="deleteEarnTarget('${et.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;}).join('');
+
+  // Income list
+  const incEl = document.getElementById('income-list');
+  const incEm = document.getElementById('income-empty');
+  const sortedInc = [...state.income].sort((a,b)=>(b.date||'')>(a.date||'')?1:-1).slice(0,8);
+  if (!state.income.length) { incEl.innerHTML=''; incEm.style.display='block'; }
+  else {
+    incEm.style.display='none';
+    incEl.innerHTML = sortedInc.map(i=>`
+      <div class="txn-item">
+        <div class="txn-icon" style="background:rgba(0,229,176,0.1);color:var(--accent3);">💵</div>
+        <div class="txn-info">
+          <div class="txn-name">${i.desc}</div>
+          <div class="txn-meta">${i.cat} · ${i.freq||'One-time'}${i.date?' · '+fmtDate(i.date):''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="txn-amt" style="color:var(--accent3);">+${fmt$(i.amt)}</div>
+          <button class="btn btn-danger" style="padding:3px 7px;font-size:10px;" onclick="deleteIncome('${i.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Expense list
+  const expEl = document.getElementById('expense-list');
+  const expEm = document.getElementById('expense-empty');
+  const sortedExp = [...state.expenses].sort((a,b)=>(b.date||'')>(a.date||'')?1:-1).slice(0,8);
+  if (!state.expenses.length) { expEl.innerHTML=''; expEm.style.display='block'; }
+  else {
+    expEm.style.display='none';
+    expEl.innerHTML = sortedExp.map(e=>`
+      <div class="txn-item">
+        <div class="txn-icon" style="background:rgba(255,107,107,0.1);color:#f87171;">💸</div>
+        <div class="txn-info">
+          <div class="txn-name">${e.desc}</div>
+          <div class="txn-meta">${e.cat} · ${e.freq||'One-time'}${e.date?' · '+fmtDate(e.date):''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="txn-amt" style="color:#f87171;">-${fmt$(e.amt)}</div>
+          <button class="btn btn-danger" style="padding:3px 7px;font-size:10px;" onclick="deleteExpense('${e.id}')">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // Budget
+  const budEl = document.getElementById('budget-list');
+  const budEm = document.getElementById('budget-empty');
+  if (!state.budgets.length) { budEl.innerHTML=''; budEm.style.display='block'; }
+  else {
+    budEm.style.display='none';
+    const mo = curMonth();
+    budEl.innerHTML = state.budgets.map(b=>{
+      const spent = state.expenses.filter(e=>e.cat===b.cat&&e.date&&e.date.startsWith(mo)).reduce((a,e)=>a+Number(e.amt),0);
+      const pct = Math.min(100,Math.round((spent/Number(b.amt||1))*100));
+      const col = pct>=90?'#f87171':pct>=70?'var(--accent4)':'var(--accent3)';
+      return `<div class="budget-bar-wrap">
+        <div class="budget-label-row">
+          <span style="font-weight:500;">${b.cat}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="color:${col};font-weight:600;">${fmt$(spent)} <span style="color:var(--muted);font-weight:400;">/ ${fmt$(b.amt)}</span></span>
+            <button class="btn btn-danger" style="padding:2px 7px;font-size:10px;" onclick="deleteBudget('${b.id}')">✕</button>
+          </div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${col};"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;">${pct}% used · ${fmt$(Math.max(0,b.amt-spent))} remaining</div>
+      </div>`;}).join('');
+  }
+
+  // Planned expenses
+  const plEl = document.getElementById('planned-list');
+  const plEm = document.getElementById('planned-empty');
+  if (!state.planned.length) { plEl.innerHTML=''; plEm.style.display='block'; }
+  else {
+    plEm.style.display='none';
+    const priC={high:'#f87171',medium:'var(--accent4)',low:'var(--accent3)'};
+    const sorted = [...state.planned].sort((a,b)=>(a.date||'zzz')>(b.date||'zzz')?1:-1);
+    plEl.innerHTML = sorted.map(p=>{
+      const daysLeft = p.date ? Math.ceil((new Date(p.date+' 12:00')-new Date())/86400000) : null;
+      const dl = daysLeft===null?'No date':daysLeft<0?'Overdue':daysLeft===0?'Today':daysLeft===1?'Tomorrow':`In ${daysLeft}d`;
+      return `<div class="upcoming-item">
+        <div>
+          <div style="font-size:13px;font-weight:500;">${p.desc}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px;">${p.cat} · <span style="color:${priC[p.pri]||'var(--accent4)'};">${p.pri} priority</span>${p.date?' · '+fmtDate(p.date):''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="text-align:right;">
+            <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--accent4);">${fmt$(p.amt)}</div>
+            <div style="font-size:10px;color:${daysLeft!==null&&daysLeft<=3?'#f87171':'var(--muted)'};">${dl}</div>
+          </div>
+          <button class="btn btn-danger" style="padding:3px 7px;font-size:10px;" onclick="deletePlanned('${p.id}')">✕</button>
+        </div>
+      </div>`;}).join('');
+  }
+}
+
+function saveIncome() {
+  const desc=document.getElementById('inc-desc').value.trim();
+  const amt=document.getElementById('inc-amt').value;
+  if (!desc||!amt) { toast('Fill in description and amount','error'); return; }
+  const data={id:uid(),desc,amt:Number(amt),cat:document.getElementById('inc-cat').value,date:document.getElementById('inc-date').value||today(),freq:document.getElementById('inc-freq').value};
+  state.income.unshift(data); save(); closeModal(); renderFinance(); toast('Income added! 💵');
+}
+
+function saveExpense() {
+  const desc=document.getElementById('exp-desc').value.trim();
+  const amt=document.getElementById('exp-amt').value;
+  if (!desc||!amt) { toast('Fill in description and amount','error'); return; }
+  const data={id:uid(),desc,amt:Number(amt),cat:document.getElementById('exp-cat').value,date:document.getElementById('exp-date').value||today(),freq:document.getElementById('exp-freq').value};
+  state.expenses.unshift(data); save(); closeModal(); renderFinance(); toast('Expense added! 💸');
+}
+
+function saveBudget() {
+  const amt=document.getElementById('bud-amt').value;
+  if (!amt) { toast('Enter a budget amount','error'); return; }
+  const cat=document.getElementById('bud-cat').value;
+  const existing=state.budgets.find(b=>b.cat===cat);
+  if (existing) { existing.amt=Number(amt); toast('Budget updated!'); }
+  else { state.budgets.push({id:uid(),cat,amt:Number(amt)}); toast('Budget set!'); }
+  save(); closeModal(); renderFinance();
+}
+
+function savePlanned() {
+  const desc=document.getElementById('pl-desc').value.trim();
+  const amt=document.getElementById('pl-amt').value;
+  if (!desc||!amt) { toast('Fill in description and amount','error'); return; }
+  state.planned.push({id:uid(),desc,amt:Number(amt),cat:document.getElementById('pl-cat').value,date:document.getElementById('pl-date').value,pri:document.getElementById('pl-pri').value});
+  save(); closeModal(); renderFinance(); toast('Planned expense added! 📅');
+}
+
+function saveEarnTarget() {
+  const name=document.getElementById('et-name').value.trim();
+  const amt=document.getElementById('et-amt').value;
+  if (!name||!amt) { toast('Fill in name and amount','error'); return; }
+  if (editIndex) {
+    const et=state.earnTargets.find(x=>x.id===editIndex);
+    Object.assign(et,{name,amt:Number(amt),period:document.getElementById('et-period').value,earned:Number(document.getElementById('et-earned').value)||0});
+    toast('Target updated!');
+  } else {
+    state.earnTargets.push({id:uid(),name,amt:Number(amt),period:document.getElementById('et-period').value,earned:Number(document.getElementById('et-earned').value)||0});
+    toast('Target set! 🎯');
+  }
+  save(); closeModal(); renderFinance();
+}
+
+function editEarnTarget(id) {
+  const et=state.earnTargets.find(x=>x.id===id);
+  editIndex=id;
+  document.getElementById('et-name').value=et.name;
+  document.getElementById('et-amt').value=et.amt;
+  document.getElementById('et-period').value=et.period;
+  document.getElementById('et-earned').value=et.earned||0;
+  openModal('earntarget');
+}
+
+function deleteIncome(id)  { state.income=state.income.filter(x=>x.id!==id); save(); renderFinance(); toast('Removed','info'); }
+function deleteExpense(id) { state.expenses=state.expenses.filter(x=>x.id!==id); save(); renderFinance(); toast('Removed','info'); }
+function deleteBudget(id)  { state.budgets=state.budgets.filter(x=>x.id!==id); save(); renderFinance(); toast('Budget removed','info'); }
+function deletePlanned(id) { state.planned=state.planned.filter(x=>x.id!==id); save(); renderFinance(); toast('Removed','info'); }
+function deleteEarnTarget(id){ state.earnTargets=state.earnTargets.filter(x=>x.id!==id); save(); renderFinance(); toast('Target removed','info'); }
+
+// ─── INIT ───
+async function init() {
+  const now = new Date();
+  document.getElementById('sb-day').textContent = now.getDate();
+  document.getElementById('sb-date').textContent = now.toLocaleDateString('en-US',{weekday:'short',month:'short'});
+  document.getElementById('home-date') && (document.getElementById('home-date').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}));
+  document.getElementById('win-inp')?.addEventListener('keydown',e=>{ if(e.key==='Enter') addWin(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSyncSetup(); }});
+  // set sync indicator initial state
+  setSyncIndicator(syncKey && syncBin ? 'loading' : 'off');
+  // try load from cloud first
+  if (syncKey && syncBin) {
+    renderHome(); // show something immediately
+    await cloudLoad();
+  }
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>
